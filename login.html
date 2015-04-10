@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
+    <script src="./node_modules/bootstrap/dist/js/jquery2.0.3.min.js"></script>
+    <script src="./node_modules/angular/angular.min.js"></script>
+</head>
+<body ng-app="formApp" ng-controller="formController">
+   <div class="container">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="page-header">
+                <h1>
+                    <span class="glyphicon glyphicon-tower"></span>
+                    Ajax Login Angularjs Php
+                </h1>
+            </div>
+            <div id="message"></div>
+            <form ng-submit="processForm()">
+                <div class="form-group" id="name-group">
+                    <label for="name" class="control-label">用户名:</label>
+                    <input type="text" name="name" class="form-control" placeholder="请输入用户名" ng-model="data.name"/>
+                    <span class="help-block" id="name-help"></span>
+                </div>
+                <div class="form-group" id="pass-group">
+                    <label for="pass" class="control-label">密码:</label>
+                    <input type="password" name="pass" class="form-control" placeholder="请输入密码" ng-model="data.pass"/>
+                    <span class="help-block" id="pass-help"></span>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary">登 陆</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="less.min.js"></script>
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script>
+        var formApp = angular.module('formApp',[]);
+        function formController($scope,$http){
+            $scope.data = {
+                name:null,
+                pass:null
+            }
+            //ng-click 会使用控制器上的方法进行处理
+
+            $scope.processForm = function(){
+                console.log('data:',$.param($scope.data));
+                $http(
+                    {
+                        method:'post',
+                        url:'process.php',
+                        data:$.param($scope.data),
+                        headers:{
+                            //这个content-type 是不能写错的 进行了url编码
+                           'Content-Type':'application/x-www-form-urlencoded'
+                        }
+                    }
+                ).success(
+                    function(data){
+                        console.log('success');
+                        if(!data.success){
+                            if(data.errors.name){
+                                $('#name-group').addClass('has-error');
+                                $('#name-help').html(data.errors.name);
+                            }
+                            if(data.errors.pass){
+                                $('#pass-group').addClass('has-error');
+                                $('#pass-help').html(data.errors.pass);
+                            } 
+                            $('#message').addClass('alert alert-danger').append(
+                                '<p>'+data.message+'</p>'
+                            ); 
+                        }else{
+                           $('#message').addClass('alert alert-success').append(
+                            '<p>'+data.message+'</p>'
+                            );
+                        }
+                    }
+                ).error(
+                    function(data,status,headers,config){
+                        console.log('error:',data);
+                    }
+                );
+            }
+        }
+    </script>
+
+</body>
+</html>
